@@ -8,8 +8,27 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String     @id @default(uuid())
+  email        String     @unique
   passwordHash String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
+  researches   Research[]
+}
+
+model Research {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  companyName     String
+  tier            String
+  confidenceScore Int
+  riskFactor      String
+  timeHorizon     String
+  allocationBand  String
+  keyDrivers      Json
+  keyRisks        Json
+  agentTrace      Json     // full raw state (news, sentiment, risk) for explainability
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
 }

@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.routes.js";
+import researchRoutes from "./routes/research.routes";
 
 
 
@@ -16,6 +17,8 @@ app.get("/health", (req, res) => {
 })
 
 app.use("/api/auth", authRoutes);
+app.use("/api/research", researchRoutes);
+
 
 const PORT = process.env.PORT;
 
