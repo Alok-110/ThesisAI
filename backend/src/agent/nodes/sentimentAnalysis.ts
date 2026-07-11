@@ -20,7 +20,6 @@ Respond ONLY with valid JSON in this exact shape, no other text:
   const response = await llm.invoke(prompt);
   const raw = response.content as string;
 
-  // strip markdown code fences if the model wraps the JSON in them
   const cleaned = raw.replace(/```json|```/g, "").trim();
   const parsed = JSON.parse(cleaned);
 
