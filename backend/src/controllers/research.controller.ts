@@ -16,7 +16,11 @@ export async function runResearch(req: AuthRequest, res: Response) {
 
   try {
     const result = await investmentAgent.invoke({ companyName });
-    const { verdict, newsData, sentiment, risk } = result;
+
+    console.log("[DEBUG] result keys:", Object.keys(result));
+    console.log("[DEBUG] financials value:", result.financials);
+
+    const { verdict, newsData, sentiment, risk, financials } = result;
 
     const saved = await prisma.research.create({
       data: {
@@ -29,7 +33,7 @@ export async function runResearch(req: AuthRequest, res: Response) {
         allocationBand: verdict.allocationBand,
         keyDrivers: verdict.keyDrivers,
         keyRisks: verdict.keyRisks,
-        agentTrace: { newsData, sentiment, risk },
+        agentTrace: { newsData, sentiment, risk, financials },
       },
     });
 
@@ -49,8 +53,10 @@ export async function getHistory(req: AuthRequest, res: Response) {
 }
 
 export async function getResearchById(req: AuthRequest, res: Response) {
+  const id = req.params.id as string;
+
   const research = await prisma.research.findFirst({
-    where: { id: req.params.id, userId: req.userId },
+    where: { id, userId: req.userId },
   });
   if (!research) return res.status(404).json({ error: "Not found" });
   res.json(research);

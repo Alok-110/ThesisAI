@@ -6,6 +6,13 @@ export async function synthesizeNode(state: typeof AgentState.State) {
 
 Sentiment analysis: ${JSON.stringify(state.sentiment)}
 Risk analysis: ${JSON.stringify(state.risk)}
+Financial fundamentals: ${JSON.stringify({
+  marketCap: state.financials?.marketCap,
+  peRatio: state.financials?.peRatio,
+  week52High: state.financials?.week52High,
+  week52Low: state.financials?.week52Low,
+  sector: state.financials?.sector,
+})}
 
 Based on this, produce a final investment verdict. Respond ONLY with valid JSON in this exact shape, no other text:
 {

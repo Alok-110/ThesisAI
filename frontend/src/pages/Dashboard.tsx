@@ -35,7 +35,7 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-background">
+    <div className="min-h-screen">
       <DashboardHeader />
       <div className="mx-auto w-full max-w-[720px] px-6 pb-24">
         <section className="pt-[10vh] pb-16">
@@ -60,6 +60,6 @@ export default function Dashboard() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }
