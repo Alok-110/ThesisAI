@@ -235,8 +235,6 @@ NVDA, PLTR, and MSFT were used as primary test cases during development, each pr
 
 ---
 
-## Bonus: AI usage & LLM chat transcript
+## Bonus: AI usage
 
-This entire project — architecture planning, LangGraph implementation, debugging, UI design direction, deployment, and this README — was built in active collaboration with Claude (Anthropic), including real debugging sessions (e.g. tracking down a stale-process bug that caused the financials field to silently disappear from API responses, diagnosing the Alpha Vantage ticker-vs-name mismatch, and resolving several production-only Docker/deployment issues). The full chat transcript is shared per the assignment's bonus-points request, showing genuine iteration, wrong turns, and fixes rather than a polished-after-the-fact narrative:
-
-**Full chat transcript:** https://claude.ai/share/8858bcd6-bd4e-4c90-b0a1-63247436f4b5
+This entire project — architecture planning, LangGraph implementation, debugging, UI design direction, deployment, and this README — was built in active collaboration with Claude (Anthropic), including real debugging sessions (e.g. tracking down a stale-process bug that caused the financials field to silently disappear from API responses, diagnosing the Alpha Vantage ticker-vs-name mismatch, and resolving several production-only Docker/deployment issues). The full chat transcript was included with the assignment submission per the bonus-points request, showing genuine iteration, wrong turns, and fixes rather than a polished-after-the-fact narrative.
