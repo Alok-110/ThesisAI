@@ -194,7 +194,11 @@ This is a genuine, deliberate scope cut, not an oversight — see [What We'd Imp
 NVDA, PLTR, and MSFT were used as primary test cases during development, each producing a full spectrum verdict with real Tavily news and Groq-generated sentiment/risk analysis.
 
 ### MSFT — Buy, 80/100 confidence, Medium risk
-- **Fundamentals:** 30-day price chart rendered — $385.10, -9.81% over the trailing 30 days, shown as a thin-line chart with price and % change above it
+
+![MSFT verdict header, stat cards, and fundamentals](./screenshots/msft-verdict-header.png)
+![MSFT key drivers, key risks, sentiment/risk analysis, and sources](./screenshots/msft-drivers-risks-sources.png)
+
+- **Fundamentals:** 30-day price chart rendered — $385.10, -9.81% over the trailing 30 days
 - **Key drivers:** strong YTD and 1-year returns, recent partnerships and innovations, growth potential
 - **Key risks:** insider selling activity, ongoing class action lawsuits, volatility in stock price and earnings trends
 - **Sentiment analysis (Positive):** strong performance outpacing the S&P 500, recent partnerships and innovation showcasing growth potential, despite insider selling activity
@@ -202,6 +206,10 @@ NVDA, PLTR, and MSFT were used as primary test cases during development, each pr
 - **Sources:** real, linked articles including Seeking Alpha's MSFT overview
 
 ### NVDA — Buy, 80/100 confidence, Medium risk
+
+![NVDA verdict header, stat cards, and fundamentals](./screenshots/nvda-verdict-fundamentals.png)
+![NVDA key drivers, key risks, sentiment/risk analysis, and sources](./screenshots/nvda-drivers-risks-sources.png)
+
 - **Fundamentals:** Market Cap $5.11T, P/E Ratio 32.26, 52-Week Range $161.80–$236.26, Sector: Technology
 - **Key drivers:** strong revenue growth, increasing AI technology adoption, clear product roadmap
 - **Key risks:** regulatory uncertainty around Chinese tech firms, dependence on data center revenue growth, rapidly evolving AI landscape
