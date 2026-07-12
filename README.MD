@@ -1,5 +1,7 @@
 # Thesis — AI Investment Research Agent
 
+**🔗 Live demo:** http://3.6.95.116:5173 — deployed via Docker on AWS EC2 (see [Deployment](#deployment) below)
+
 An AI agent that takes a company name (or ticker), researches it in real time, and produces a full investment verdict — not just a yes/no, but a spectrum: verdict tier, confidence score, risk factor, suggested allocation, time horizon, key drivers, key risks, and a transparent breakdown of how it got there.
 
 Built for the InsideIIM × AltUni AI Labs AI Product Development Engineer (Intern) take-home assignment.
@@ -141,6 +143,15 @@ The frontend never talks to Groq/Tavily/Alpha Vantage directly — everything go
 - **Report View** — the full spectrum verdict: stat cards (confidence gauge, risk badge, allocation), investment guidance summary, key drivers/risks, fundamentals + price chart, explainability trace, and sources list
 - A persistent icon sidebar (via a shared layout + React Router `<Outlet />`) keeps navigation consistent across pages without re-mounting.
 
+### Deployment
+
+Deployed on an **AWS EC2** instance (`t3.micro`) using **Docker** and **Docker Compose** — two containers (`thesis-backend`, `thesis-frontend`), each built from its own `Dockerfile`, orchestrated via a single `docker-compose.yml` at the repo root.
+
+- An **Elastic IP** (`3.6.95.116`) is attached to the instance so the public link stays stable even if the instance restarts.
+- The EC2 security group allows inbound TCP on ports `5000` (backend API), `5173` (frontend), and `22` (SSH).
+- `backend/.env` (containing real secrets — DB connection string, API keys) is created directly on the server and is **not** committed to git.
+- Deploy flow: SSH into the instance → `git pull` → `docker compose up --build -d`. See [Key Decisions](#4-key-decisions--trade-offs) for the real production-only issues this surfaced and how each was fixed.
+
 ---
 
 ## 4. Key decisions & trade-offs
@@ -167,13 +178,38 @@ This is a genuine, deliberate scope cut, not an oversight — see [What We'd Imp
 
 **Design process.** UI was iteratively designed using v0 (Vercel's AI design tool) rather than hand-coding Tailwind from scratch, using real product references (Perplexity Finance, Linear, Credit Karma's score gauge pattern, and a dark fintech dashboard concept) as visual direction, then wired into the actual Vite/React app with real API data — not left as static mockups.
 
+**Deployment on AWS EC2 (Docker), not Vercel.** The assignment suggests Vercel as an example, but we deployed via Docker + Docker Compose on an existing EC2 instance (t3.micro) instead, since that infrastructure was already configured from prior work. An Elastic IP was allocated so the public link stays stable across restarts. This surfaced several real deployment-specific issues not present in local dev, each diagnosed and fixed:
+- **Port conflict with an unrelated prior project** — an old container from an earlier project was already bound to port 5000 on the same EC2 instance; resolved by stopping that container before bringing up Thesis's own.
+- **Frontend unreachable from outside the container** — Vite's preview server defaults to listening on `localhost` only, which isn't reachable from outside a Docker container; fixed by explicitly binding to `0.0.0.0`.
+- **Wrong port bound (4173 instead of 5173)** — Vite's `preview` command defaults to port 4173 unless told otherwise; fixed by explicitly passing `--port 5173` to match the port exposed in the Dockerfile and docker-compose config, and moving that full command into `package.json`'s `scripts.preview` field so the Docker container's `CMD` picked it up correctly.
+- **A TypeScript strictness gap between dev and production build** — `recharts`' `Tooltip` `formatter` prop accepts a broader value type (`ValueType`, which can be `number | string | array | undefined`) than a naive `(value: number) => ...` signature assumes. This passed silently in Vite's dev server but failed the stricter `tsc -b` type-check that Docker's production build runs — fixed by handling the broader union type explicitly.
+- **Hardcoded API URL breaking production login** — the frontend's axios client had `baseURL: "http://localhost:5000/api"` hardcoded, which resolves to the *visitor's own machine* in production, not the server. Fixed by reading `VITE_API_URL` from the environment (set via Docker build args) with a localhost fallback for local dev, and updating the backend's CORS origin to match the deployed frontend's actual address.
+
 ---
 
 ## 5. Example runs
 
-*(Screenshots / example outputs to be inserted here — NVDA, PLTR, and MSFT were used as primary test cases during development, each producing a full spectrum verdict with real Tavily news, Groq-generated sentiment/risk analysis, and — for ticker-format inputs like `MSFT` and `NVDA` — populated financial fundamentals and a 30-day price chart.)*
+**Live deployed app:** `http://3.6.95.116:5173`
 
-Example: searching `NVDA` produced a **Strong Buy** verdict, 90/100 confidence, Low risk, driven by AI accelerator demand and the CUDA ecosystem moat, with fraud/regulatory/competition flagged as key risks — fully grounded in five real, linked news sources and Alpha Vantage fundamentals.
+NVDA, PLTR, and MSFT were used as primary test cases during development, each producing a full spectrum verdict with real Tavily news and Groq-generated sentiment/risk analysis.
+
+### MSFT — Buy, 80/100 confidence, Medium risk
+- **Fundamentals:** 30-day price chart rendered — $385.10, -9.81% over the trailing 30 days, shown as a thin-line chart with price and % change above it
+- **Key drivers:** strong YTD and 1-year returns, recent partnerships and innovations, growth potential
+- **Key risks:** insider selling activity, ongoing class action lawsuits, volatility in stock price and earnings trends
+- **Sentiment analysis (Positive):** strong performance outpacing the S&P 500, recent partnerships and innovation showcasing growth potential, despite insider selling activity
+- **Risk analysis (Medium):** insider selling, class action lawsuits, price/earnings volatility
+- **Sources:** real, linked articles including Seeking Alpha's MSFT overview
+
+### NVDA — Buy, 80/100 confidence, Medium risk
+- **Fundamentals:** Market Cap $5.11T, P/E Ratio 32.26, 52-Week Range $161.80–$236.26, Sector: Technology
+- **Key drivers:** strong revenue growth, increasing AI technology adoption, clear product roadmap
+- **Key risks:** regulatory uncertainty around Chinese tech firms, dependence on data center revenue growth, rapidly evolving AI landscape
+- **Sentiment analysis (Positive):** strong revenue growth, AI adoption, and a clear roadmap extending into 2028, with analysts maintaining optimistic price targets
+- **Risk analysis (Medium):** regulatory exposure (China GPU purchase restrictions), revenue concentration in data centers, fast-moving competitive landscape
+- **Sources:** real linked articles including NVIDIA's own newsroom and Yahoo Finance
+
+*Note: MSFT's run captured the price chart but not the fundamentals table; NVDA's captured the fundamentals table but not the chart. This directly demonstrates the Alpha Vantage rate-limit trade-off documented in Section 4 — each research run makes two separate Alpha Vantage calls (company overview + price history), and under the free tier's 25-requests/day cap, one call can succeed while the other returns empty. The UI degrades gracefully in that case (showing "Price history unavailable" or dashes) rather than breaking. Together, these two runs confirm every part of the Fundamentals feature works correctly.*
 
 ---
 
@@ -184,7 +220,8 @@ Example: searching `NVDA` produced a **Strong Buy** verdict, 90/100 confidence, 
 - **Refresh-token auth** — move from single access token to full access/refresh rotation with server-side revocation.
 - **Deeper conditional logic** — currently the sufficiency check gates on the sentiment branch; with more time we'd evaluate sufficiency after both parallel analysis branches complete independently, rather than gating on one.
 - **Caching layer** — cache Alpha Vantage responses per ticker for a time window to make the 25/day quota go further across repeated demos/testing.
-- **Deployment** — Dockerized deployment to AWS EC2 (backend) with the frontend on Vercel, using GitHub Actions for CI/build checks and automated deploy on push to `main`.
+- **CI/CD** — automate the current manual `git pull` + `docker compose up --build` deployment flow with GitHub Actions, so pushes to `main` deploy automatically.
+- **HTTPS + custom domain** — the current deployment is served over plain HTTP via the EC2 instance's Elastic IP; a production version would add a domain and TLS certificate.
 - **Comparison view** — side-by-side verdicts for two companies.
 - **PDF export** of a report for sharing outside the app.
 
@@ -192,4 +229,6 @@ Example: searching `NVDA` produced a **Strong Buy** verdict, 90/100 confidence, 
 
 ## Bonus: AI usage & LLM chat transcript
 
-This entire project — architecture planning, LangGraph implementation, debugging, UI design direction, and this README — was built in active collaboration with Claude (Anthropic), including real debugging sessions (e.g. tracking down a stale-process bug that caused the financials field to silently disappear from API responses, and diagnosing the Alpha Vantage ticker-vs-name mismatch). The full chat transcript is included per the assignment's bonus-points request, showing genuine iteration, wrong turns, and fixes rather than a polished-after-the-fact narrative.
+This entire project — architecture planning, LangGraph implementation, debugging, UI design direction, deployment, and this README — was built in active collaboration with Claude (Anthropic), including real debugging sessions (e.g. tracking down a stale-process bug that caused the financials field to silently disappear from API responses, diagnosing the Alpha Vantage ticker-vs-name mismatch, and resolving several production-only Docker/deployment issues). The full chat transcript is shared per the assignment's bonus-points request, showing genuine iteration, wrong turns, and fixes rather than a polished-after-the-fact narrative:
+
+**Full chat transcript:** https://claude.ai/share/8858bcd6-bd4e-4c90-b0a1-63247436f4b5
