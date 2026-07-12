@@ -25,8 +25,10 @@ export function PriceChart({ data }: { data: { date: string; close: number }[] }
           <Tooltip
             contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 4, fontSize: 12 }}
             labelStyle={{ color: "var(--muted-foreground)" }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, "Close"]}
-          />
+formatter={(value) => {
+  const num = typeof value === "number" ? value : Array.isArray(value) ? Number(value[0]) : Number(value);
+  return [`$${(Number.isFinite(num) ? num : 0).toFixed(2)}`, "Close"];
+}}          />
           <Line
             type="monotone"
             dataKey="close"
