@@ -29,7 +29,7 @@ export default function Login() {
   }
 
   return (
-    <AuthShell heading="Log in to Verdikt" subheading="Enter your credentials to access your research.">
+    <AuthShell heading="Log in to Thesis" subheading="Enter your credentials to access your research.">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <AuthField
           id="email"

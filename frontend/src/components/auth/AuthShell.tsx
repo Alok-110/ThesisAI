@@ -13,7 +13,7 @@ export function AuthShell({
     <main className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center px-6 py-5 md:px-8">
         <span className="select-none font-mono text-sm font-medium tracking-tight text-foreground">
-          Verdikt
+          Thesis
         </span>
       </header>
       <div className="flex flex-1 items-start justify-center px-6 pt-[14vh] pb-16">
