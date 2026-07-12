@@ -1,8 +1,23 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-export function PriceChart({ data }: { data: { date: string; close: number }[] }) {
+export function PriceChart({
+  data,
+}: {
+  data: { date: string; close: number }[];
+}) {
   if (!data || data.length === 0) {
-    return <p className="text-xs text-muted-foreground">Price history unavailable.</p>;
+    return (
+      <p className="text-xs text-muted-foreground">
+        Price history unavailable.
+      </p>
+    );
   }
 
   const first = data[0].close;
@@ -13,9 +28,14 @@ export function PriceChart({ data }: { data: { date: string; close: number }[] }
   return (
     <div>
       <div className="mb-3 flex items-baseline gap-2">
-        <span className="font-mono text-2xl font-semibold text-foreground">${last.toFixed(2)}</span>
-        <span className={`font-mono text-sm ${isUp ? "text-success" : "text-destructive"}`}>
-          {isUp ? "+" : ""}{change}% (30d)
+        <span className="font-mono text-2xl font-semibold text-foreground">
+          ${last.toFixed(2)}
+        </span>
+        <span
+          className={`font-mono text-sm ${isUp ? "text-success" : "text-destructive"}`}
+        >
+          {isUp ? "+" : ""}
+          {change}% (30d)
         </span>
       </div>
       <ResponsiveContainer width="100%" height={140}>
@@ -23,9 +43,25 @@ export function PriceChart({ data }: { data: { date: string; close: number }[] }
           <XAxis dataKey="date" hide />
           <YAxis domain={["auto", "auto"]} hide />
           <Tooltip
-            contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 4, fontSize: 12 }}
+            contentStyle={{
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: 4,
+              fontSize: 12,
+            }}
             labelStyle={{ color: "var(--muted-foreground)" }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, "Close"]}
+            formatter={(value) => {
+              const num =
+                typeof value === "number"
+                  ? value
+                  : Array.isArray(value)
+                    ? Number(value[0])
+                    : Number(value);
+              return [
+                `$${(Number.isFinite(num) ? num : 0).toFixed(2)}`,
+                "Close",
+              ];
+            }}
           />
           <Line
             type="monotone"
