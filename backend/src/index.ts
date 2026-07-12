@@ -12,8 +12,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-
+app.use(cors({ origin: "http://3.6.95.116:5173", credentials: true }));
 
 app.get("/health", (req, res) => {
   res.json({ status: 200, message: "health in check" })
